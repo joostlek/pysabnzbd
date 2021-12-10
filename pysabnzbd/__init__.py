@@ -17,7 +17,6 @@ class SabnzbdApi(object):
         self._timeout = timeout
 
         if session is None:
-            loop = asyncio.get_event_loop()
             self._session = ClientSession()
             self._cleanup_session = True
         else:
