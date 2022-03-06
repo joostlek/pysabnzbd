@@ -1,7 +1,5 @@
-import aiohttp
+from aiohttp import ClientError, ClientSession, ClientTimeout
 import asyncio
-
-from async_timeout import timeout
 
 
 class SabnzbdApi(object):
@@ -19,8 +17,7 @@ class SabnzbdApi(object):
         self._timeout = timeout
 
         if session is None:
-            loop = asyncio.get_event_loop()
-            self._session = aiohttp.ClientSession(loop=loop)
+            self._session = ClientSession()
             self._cleanup_session = True
         else:
             self._session = session
@@ -38,14 +35,17 @@ class SabnzbdApi(object):
 
         p = {**self._default_params, **params}
         try:
-            async with timeout(self._timeout, loop=self._session.loop):
-                async with self._session.get(self._api_url, params=p) as resp:
-                    data = await resp.json()
-                    if data.get('status', True) is False:
-                        self._handle_error(data, params)
-                    else:
-                        return data
-        except aiohttp.ClientError:
+            resp = await self._session.get(
+                self._api_url,
+                params=p,
+                timeout=ClientTimeout(self._timeout)
+            )
+            data = await resp.json()
+            if data.get('status', True) is False:
+                self._handle_error(data, params)
+            else:
+                return data
+        except ClientError:
             raise SabnzbdApiException('Unable to communicate with Sabnzbd API')
         except asyncio.TimeoutError:
             raise SabnzbdApiException('SABnzbd API request timed out')
