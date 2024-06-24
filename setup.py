@@ -11,5 +11,7 @@ setup(
     download_url='https://github.com/jeradM/pysabnzbd/archive/1.1.0.tar.gz',
     keywords=['SABnzbd'],
     install_requires=["aiohttp>=3.6.1,<4.0"],
-    classifiers=[]
+    classifiers=[
+        "License :: OSI Approved :: MIT License"
+    ]
 )
